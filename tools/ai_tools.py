@@ -5,18 +5,21 @@ from config import (
     TEMPERATURE
 )
 
+
 llm = ChatOllama(
     model=OLLAMA_MODEL,
     temperature=TEMPERATURE
 )
 
 
-def ask_llm(prompt: str) -> str:
-    """
-    Send prompt to Ollama model
-    and return response.
-    """
+def ask_llm(prompt: str, history: list = None) -> str:
 
-    response = llm.invoke(prompt)
+    try:
 
-    return response.content
+        response = llm.invoke(prompt)
+
+        return response.content
+
+    except Exception as e:
+
+        return f"Error: {str(e)}"

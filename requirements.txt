@@ -6,3 +6,4 @@ psutil
 speechrecognition
 pyttsx3
 pyaudio
+screen-brightness-control

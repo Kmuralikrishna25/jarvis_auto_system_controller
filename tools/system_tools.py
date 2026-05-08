@@ -1,5 +1,8 @@
 import os
+import re
 import webbrowser
+import urllib.parse
+
 import pyautogui
 
 
@@ -26,9 +29,12 @@ def open_youtube() -> str:
 
 def search_google(query: str) -> str:
 
-    webbrowser.open(
-        f"https://www.google.com/search?q={query}"
+    url = (
+        "https://www.google.com/search?q="
+        + urllib.parse.quote(query)
     )
+
+    webbrowser.open(url)
 
     return f"Searching Google for {query}"
 
@@ -58,8 +64,6 @@ def take_screenshot() -> str:
 
 def open_whatsapp() -> str:
 
-    import webbrowser
-
     webbrowser.open(
         "https://web.whatsapp.com"
     )
@@ -69,13 +73,86 @@ def open_whatsapp() -> str:
 
 def search_youtube(query: str) -> str:
 
-    import webbrowser
-
     if not query:
         query = "trending"
 
-    url = f"https://www.youtube.com/results?search_query={query}"
+    url = (
+        "https://www.youtube.com/results?search_query="
+        + urllib.parse.quote(query)
+    )
 
     webbrowser.open(url)
 
     return f"Searching YouTube for {query}"
+
+
+def extract_youtube_query(user_input: str) -> str:
+
+    # Remove common filler words (word boundary only)
+    stop_words = {
+        "play", "search", "find", "youtube", "on",
+        "open", "and", "for", "the", "me", "a",
+        "any", "some", "please", "can", "could"
+    }
+
+    words = user_input.lower().split()
+
+    filtered = [
+        w for w in words
+        if w not in stop_words
+    ]
+
+    return " ".join(filtered).strip()
+
+
+def set_brightness(level: int) -> str:
+
+    try:
+
+        import screen_brightness_control as sbc
+
+        sbc.set_brightness(level)
+
+        return f"Brightness set to {level}%"
+
+    except:
+
+        return "Failed to change brightness. Install: pip install screen-brightness-control"
+
+
+def decrease_brightness(amount: int = 20) -> str:
+
+    try:
+
+        import screen_brightness_control as sbc
+
+        current = sbc.get_brightness()[0]
+
+        new_level = max(0, current - amount)
+
+        sbc.set_brightness(new_level)
+
+        return f"Brightness decreased to {new_level}%"
+
+    except:
+
+        return "Failed to change brightness. Install: pip install screen-brightness-control"
+
+
+def increase_brightness(amount: int = 20) -> str:
+
+    try:
+
+        import screen_brightness_control as sbc
+
+        current = sbc.get_brightness()[0]
+
+        new_level = min(100, current + amount)
+
+        sbc.set_brightness(new_level)
+
+        return f"Brightness increased to {new_level}%"
+
+    except:
+
+        return "Failed to change brightness. Install: pip install screen-brightness-control"

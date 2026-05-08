@@ -12,9 +12,13 @@ from tools.system_tools import (
     open_whatsapp,
     search_google,
     search_youtube,
+    extract_youtube_query,
     shutdown_pc,
     restart_pc,
-    take_screenshot
+    take_screenshot,
+    decrease_brightness,
+    increase_brightness,
+    set_brightness
 )
 
 from tools.file_tools import (
@@ -37,6 +41,9 @@ TOOLS = {
     "shutdown_pc": shutdown_pc,
     "restart_pc": restart_pc,
     "take_screenshot": take_screenshot,
+    "decrease_brightness": decrease_brightness,
+    "increase_brightness": increase_brightness,
+    "set_brightness": set_brightness,
     "list_directory": list_directory,
     "read_file": read_file,
     "write_file": write_file,
@@ -48,102 +55,139 @@ TOOLS = {
 
 def jarvis_agent(state: AgentState):
 
-    user_input = state["user_input"]
+    user_input = state["user_input"].lower()
 
     memory = state.get("conversation_history", [])
 
-    context = ""
+    responses = []
 
-    if memory:
+    # ==========================================
+    # OPEN APPS
+    # ==========================================
 
-        recent = memory[-5:]
+    if "open" in user_input:
 
-        context = "\n".join(
-            [f"{m['role']}: {m['content']}"
-             for m in recent]
-        )
+        if "chrome" in user_input:
+            responses.append(open_chrome())
 
-    tool_descriptions = "\n".join(
-        [f"- {name}: {func.__doc__ or 'No description'}"
-         for name, func in TOOLS.items()]
-    )
+        if "vscode" in user_input or "visual studio" in user_input:
+            responses.append(open_vscode())
 
-    prompt = f"""
-You are Jarvis, an AI assistant.
+        if "youtube" in user_input:
+            responses.append(open_youtube())
 
-Context:
-{context}
+        if "whatsapp" in user_input:
+            responses.append(open_whatsapp())
 
-User: {user_input}
+    # ==========================================
+    # YOUTUBE SEARCH/PLAY
+    # ==========================================
 
-Available tools:
-{tool_descriptions}
+    if "youtube" in user_input and any(
+        w in user_input
+        for w in ["play", "search", "find"]
+    ):
 
-INSTRUCTIONS:
-1. Understand the user's request
-2. Call the appropriate tool(s)
-3. For compound requests, call multiple tools in order
-4. Return the result
+        query = extract_youtube_query(user_input)
 
-If opening YouTube and searching: call open_youtube, then search_youtube.
-If asking to code: provide code directly.
-"""
+        if query:
+            responses.append(search_youtube(query))
+        else:
+            responses.append(open_youtube())
 
-    # Get LLM response
-    response = ask_llm(prompt)
+    # ==========================================
+    # GOOGLE SEARCH
+    # ==========================================
 
-    # Simple tool execution (for demo)
-    response_text = str(response)
-
-    # Execute tools based on keywords (temporary)
-    if "open chrome" in user_input.lower():
-        response_text = open_chrome()
-
-    elif "open youtube" in user_input.lower():
-
-        response_text = open_youtube()
-
-        if "play" in user_input.lower() or "search" in user_input.lower():
-
-            query = user_input
-
-            for word in ["play", "search"]:
-                if word in query:
-                    parts = query.split(word)
-                    if len(parts) > 1:
-                        query = parts[1].strip()
-                        break
-
-            query = query.replace("youtube", "").replace("for", "").strip()
-
-            if query:
-                response_text += "\n" + search_youtube(query)
-
-    elif "search" in user_input.lower():
+    if "search" in user_input:
 
         query = user_input.replace("search", "").replace("for", "").strip()
 
-        response_text = search_google(query)
+        if "google" in user_input:
+            query = query.replace("google", "").strip()
 
-    else:
+        if query:
+            responses.append(search_google(query))
+        else:
+            responses.append("What should I search for?")
 
-        response_text = response
+    # ==========================================
+    # SCREENSHOT
+    # ==========================================
+
+    if "screenshot" in user_input:
+        responses.append(take_screenshot())
+
+    # ==========================================
+    # BRIGHTNESS
+    # ==========================================
+
+    if "brightness" in user_input:
+
+        if "decrease" in user_input or "lower" in user_input or "dim" in user_input:
+            responses.append(decrease_brightness())
+
+        elif "increase" in user_input or "raise" in user_input or "brighten" in user_input:
+            responses.append(increase_brightness())
+
+        else:
+            # Try to extract number
+            import re
+            numbers = re.findall(r'\d+', user_input)
+            if numbers:
+                responses.append(set_brightness(int(numbers[0])))
+            else:
+                responses.append("Specify brightness level (0-100)")
+
+    # ==========================================
+    # SHUTDOWN/RESTART
+    # ==========================================
+
+    if "shutdown" in user_input or "turn off" in user_input:
+        responses.append(shutdown_pc())
+
+    if "restart" in user_input or "reboot" in user_input:
+        responses.append(restart_pc())
+
+    # ==========================================
+    # FILE OPERATIONS
+    # ==========================================
+
+    if "list" in user_input or "show files" in user_input:
+        responses.append(list_directory())
+
+    if "read" in user_input or "open file" in user_input:
+        # Extract filename
+        words = user_input.split()
+        for i, w in enumerate(words):
+            if w in ["read", "file", "open"] and i + 1 < len(words):
+                responses.append(read_file(words[i + 1]))
+                break
+
+    # ==========================================
+    # IF NO COMMAND MATCHED, USE LLM
+    # ==========================================
+
+    if not responses:
+
+        prompt = f"""
+User: {user_input}
+
+Provide a helpful response.
+"""
+
+        response = ask_llm(prompt)
+        responses.append(str(response))
+
+    # Combine responses
+    final_response = "\n".join(responses)
 
     # Update memory
-    memory.append({
-        "role": "user",
-        "content": user_input,
-        "timestamp": ""
-    })
-
-    memory.append({
-        "role": "assistant",
-        "content": str(response_text),
-        "timestamp": ""
-    })
+    memory.append({"role": "user", "content": state["user_input"]})
+    memory.append({"role": "assistant", "content": final_response})
 
     return {
-        "response": str(response_text),
+        "response": final_response,
         "conversation_history": memory
     }
 
