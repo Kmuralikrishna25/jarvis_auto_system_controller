@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, List, Dict, Any
 
 
 class AgentState(TypedDict):
@@ -8,3 +8,7 @@ class AgentState(TypedDict):
     next_agent: str
 
     response: str
+
+    conversation_history: List[Dict[str, str]]
+
+    context: Dict[str, Any]

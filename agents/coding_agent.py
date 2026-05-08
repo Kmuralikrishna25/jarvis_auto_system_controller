@@ -5,19 +5,27 @@ from tools.ai_tools import ask_llm
 
 def coding_agent(state: AgentState):
 
-    user_input = state["user_input"]
+    try:
 
-    prompt = f"""
-    You are an expert AI coding assistant.
+        user_input = state["user_input"]
 
-    User Request:
-    {user_input}
+        prompt = f"""
+You are an expert AI coding assistant.
 
-    Provide clean and professional code.
-    """
+User Request:
+{user_input}
 
-    response = ask_llm(prompt)
+Provide clean and professional code.
+"""
 
-    return {
-        "response": response
-    }
+        response = ask_llm(prompt)
+
+        return {
+            "response": response
+        }
+
+    except Exception as e:
+
+        return {
+            "response": f"Error in coding agent: {str(e)}"
+        }

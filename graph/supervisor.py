@@ -1,61 +1,55 @@
 from graph.state import AgentState
 
-
-SYSTEM_KEYWORDS = [
-    "open",
-    "shutdown",
-    "restart",
-    "screenshot",
-    "chrome",
-    "vscode"
-]
-
-BROWSER_KEYWORDS = [
-    "search",
-    "youtube",
-    "google"
-]
-
-CODING_KEYWORDS = [
-    "code",
-    "python",
-    "bug",
-    "function",
-    "program"
-]
+from tools.ai_tools import ask_llm
 
 
 def supervisor(state: AgentState):
 
-    user_input = state["user_input"].lower()
+    user_input = state["user_input"]
 
-    if any(
-        keyword in user_input
-        for keyword in SYSTEM_KEYWORDS
-    ):
+    memory = state.get(
+        "conversation_history",
+        []
+    )
 
-        return {
-            "next_agent": "system_agent"
-        }
+    context = ""
 
-    if any(
-        keyword in user_input
-        for keyword in BROWSER_KEYWORDS
-    ):
+    if memory:
 
-        return {
-            "next_agent": "browser_agent"
-        }
+        recent = memory[-5:]
 
-    if any(
-        keyword in user_input
-        for keyword in CODING_KEYWORDS
-    ):
+        context = "Previous: " + " | ".join(
+            [m["content"] for m in recent]
+        )
 
-        return {
-            "next_agent": "coding_agent"
-        }
+    prompt = f"""
+You are Jarvis's supervisor.
 
-    return {
-        "next_agent": "coding_agent"
-    }
+{context}
+
+User request: {user_input}
+
+Decide which agent should handle this:
+- system_agent: OS commands, open apps, shutdown, restart, screenshot
+- browser_agent: web search, YouTube, browsing
+- coding_agent: code, programming, debugging
+- memory_agent: follow-up questions, context-aware requests
+- file_agent: file operations, read/write, list directories
+
+Respond with ONLY the agent name.
+"""
+
+    response = ask_llm(prompt).strip().lower()
+
+    valid_agents = [
+        "system_agent",
+        "browser_agent",
+        "coding_agent",
+        "memory_agent",
+        "file_agent"
+    ]
+
+    if response in valid_agents:
+        return {"next_agent": response}
+
+    return {"next_agent": "memory_agent"}

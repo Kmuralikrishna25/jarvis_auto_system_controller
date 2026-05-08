@@ -1,8 +1,8 @@
 langgraph
 langchain
+langchain-ollama
 pyautogui
 psutil
 speechrecognition
 pyttsx3
 pyaudio
-langchain-ollama

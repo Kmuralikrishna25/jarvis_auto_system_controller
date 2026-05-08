@@ -4,6 +4,7 @@ from tools.system_tools import (
     open_chrome,
     open_vscode,
     open_youtube,
+    open_whatsapp,
     search_google,
     shutdown_pc,
     restart_pc,
@@ -15,30 +16,103 @@ def system_agent(state: AgentState):
 
     user_input = state["user_input"].lower()
 
-    response = "System command not recognized"
+    try:
 
-    if "chrome" in user_input:
-        response = open_chrome()
+        # ==========================================
+        # OPEN CHROME
+        # ==========================================
 
-    elif "vscode" in user_input or "visual studio" in user_input:
-        response = open_vscode()
+        if "chrome" in user_input:
 
-    elif "youtube" in user_input:
-        response = open_youtube()
+            return {
+                "response": open_chrome()
+            }
 
-    elif "search" in user_input:
-        query = user_input.replace("search", "").strip()
-        response = search_google(query)
+        # ==========================================
+        # OPEN VSCODE
+        # ==========================================
 
-    elif "shutdown" in user_input or "turn off" in user_input:
-        response = shutdown_pc()
+        elif "vscode" in user_input:
 
-    elif "restart" in user_input or "reboot" in user_input:
-        response = restart_pc()
+            return {
+                "response": open_vscode()
+            }
 
-    elif "screenshot" in user_input:
-        response = take_screenshot()
+        # ==========================================
+        # OPEN YOUTUBE
+        # ==========================================
 
-    return {
-        "response": response
-    }
+        elif "youtube" in user_input:
+
+            return {
+                "response": open_youtube()
+            }
+
+        # ==========================================
+        # OPEN WHATSAPP
+        # ==========================================
+
+        elif "whatsapp" in user_input:
+
+            return {
+                "response": open_whatsapp()
+            }
+
+        # ==========================================
+        # GOOGLE SEARCH
+        # ==========================================
+
+        elif "search google" in user_input:
+
+            query = user_input.replace(
+                "search google",
+                ""
+            ).strip()
+
+            return {
+                "response": search_google(query)
+            }
+
+        # ==========================================
+        # SHUTDOWN
+        # ==========================================
+
+        elif "shutdown" in user_input:
+
+            return {
+                "response": shutdown_pc()
+            }
+
+        # ==========================================
+        # RESTART
+        # ==========================================
+
+        elif "restart" in user_input:
+
+            return {
+                "response": restart_pc()
+            }
+
+        # ==========================================
+        # SCREENSHOT
+        # ==========================================
+
+        elif "screenshot" in user_input:
+
+            return {
+                "response": take_screenshot()
+            }
+
+        # ==========================================
+        # DEFAULT
+        # ==========================================
+
+        return {
+            "response": "System command not recognized"
+        }
+
+    except Exception as e:
+
+        return {
+            "response": f"Error executing command: {str(e)}"
+        }

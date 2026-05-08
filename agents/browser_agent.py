@@ -10,21 +10,29 @@ def browser_agent(state: AgentState):
 
     user_input = state["user_input"].lower()
 
-    response = "Browser command not recognized"
+    try:
 
-    if "youtube" in user_input:
+        response = "Browser command not recognized"
 
-        response = open_youtube()
+        if "youtube" in user_input:
 
-    elif "search" in user_input:
+            response = open_youtube()
 
-        query = user_input.replace(
-            "search",
-            ""
-        ).strip()
+        elif "search" in user_input:
 
-        response = search_google(query)
+            query = user_input.replace(
+                "search",
+                ""
+            ).strip()
 
-    return {
-        "response": response
-    }
+            response = search_google(query)
+
+        return {
+            "response": response
+        }
+
+    except Exception as e:
+
+        return {
+            "response": f"Error in browser agent: {str(e)}"
+        }

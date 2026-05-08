@@ -8,6 +8,8 @@ from graph.supervisor import supervisor
 from agents.system_agent import system_agent
 from agents.browser_agent import browser_agent
 from agents.coding_agent import coding_agent
+from agents.memory_agent import memory_agent
+from agents.file_agent import file_agent
 
 
 workflow = StateGraph(AgentState)
@@ -37,6 +39,16 @@ workflow.add_node(
     coding_agent
 )
 
+workflow.add_node(
+    "memory_agent",
+    memory_agent
+)
+
+workflow.add_node(
+    "file_agent",
+    file_agent
+)
+
 
 # ====================================
 # ENTRY POINT
@@ -57,7 +69,9 @@ workflow.add_conditional_edges(
     {
         "system_agent": "system_agent",
         "browser_agent": "browser_agent",
-        "coding_agent": "coding_agent"
+        "coding_agent": "coding_agent",
+        "memory_agent": "memory_agent",
+        "file_agent": "file_agent"
     }
 )
 
@@ -78,6 +92,16 @@ workflow.add_edge(
 
 workflow.add_edge(
     "coding_agent",
+    END
+)
+
+workflow.add_edge(
+    "memory_agent",
+    END
+)
+
+workflow.add_edge(
+    "file_agent",
     END
 )
 

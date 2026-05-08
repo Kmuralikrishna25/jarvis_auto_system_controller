@@ -54,3 +54,14 @@ def take_screenshot() -> str:
     image.save("screenshots/screenshot.png")
 
     return "Screenshot captured"
+
+
+def open_whatsapp() -> str:
+
+    import webbrowser
+
+    webbrowser.open(
+        "https://web.whatsapp.com"
+    )
+
+    return "Opening WhatsApp Web"

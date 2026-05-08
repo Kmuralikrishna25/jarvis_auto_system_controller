@@ -1,33 +1,201 @@
 from graph.builder import jarvis_graph
 
+from agents.voice_agent import (
+    listen,
+    speak,
+    stop_speaking
+)
+
+from tools.memory_tools import (
+    load_memory,
+    save_memory
+)
+
+from tools.scheduler_tools import (
+    check_reminders,
+    list_reminders
+)
+
+import threading
+import time
+
+
+# ==========================================
+# REMINDER CHECKER
+# ==========================================
+
+def reminder_checker(memory: list, running: list):
+
+    while running[0]:
+
+        reminders = check_reminders()
+
+        for task in reminders:
+
+            speak(f"Reminder: {task}")
+
+        time.sleep(30)
+
+
+# ==========================================
+# PROCESS USER REQUEST
+# ==========================================
+
+def process_command(user_input: str, memory: list):
+
+    initial_state = {
+        "user_input": user_input,
+        "next_agent": "",
+        "response": "",
+        "conversation_history": memory,
+        "context": {}
+    }
+
+    result = jarvis_graph.invoke(
+        initial_state
+    )
+
+    response = result["response"]
+
+    memory = result.get(
+        "conversation_history",
+        memory
+    )
+
+    speak(response)
+
+    return memory
+
+
+# ==========================================
+# MAIN JARVIS LOOP
+# ==========================================
 
 def run_jarvis():
 
-    print("\nJarvis Activated")
-    print("Type 'exit' to quit\n")
+    speak("Jarvis activated.")
+
+    memory = load_memory()
+
+    running = [True]
+
+    reminder_thread = threading.Thread(
+        target=reminder_checker,
+        args=(memory, running),
+        daemon=True
+    )
+
+    reminder_thread.start()
 
     while True:
 
-        user_input = input("You: ")
+        user_input = listen()
 
-        if user_input.lower() == "exit":
+        # Ignore empty audio
+        if not user_input:
+            continue
 
-            print("\nJarvis: Goodbye\n")
+        # ======================================
+        # STOP SPEAKING COMMANDS
+        # ======================================
+
+        if any(word in user_input for word in [
+            "stop",
+            "stop speaking",
+            "be quiet",
+            "silence"
+        ]):
+
+            stop_speaking()
+
+            continue
+
+        # ======================================
+        # EXIT COMMANDS
+        # ======================================
+
+        if any(word in user_input for word in [
+            "exit",
+            "quit",
+            "shutdown jarvis"
+        ]):
+
+            stop_speaking()
+
+            save_memory(memory)
+
+            running[0] = False
+
+            speak("Goodbye.")
 
             break
 
-        initial_state = {
-            "user_input": user_input,
-            "next_agent": "",
-            "response": ""
-        }
+        # ======================================
+        # LIST REMINDERS
+        # ======================================
 
-        result = jarvis_graph.invoke(
-            initial_state
+        if "list reminders" in user_input or "show reminders" in user_input:
+
+            speak(list_reminders())
+
+            continue
+
+        # ======================================
+        # SET REMINDER
+        # ======================================
+
+        if "remind me" in user_input or "set reminder" in user_input:
+
+            from tools.scheduler_tools import add_reminder
+
+            if "in" in user_input:
+
+                parts = user_input.split("in")
+
+                if len(parts) > 1:
+
+                    time_part = parts[1].strip()
+
+                    task = parts[0].replace(
+                        "remind me",
+                        ""
+                    ).replace(
+                        "set reminder",
+                        ""
+                    ).strip()
+
+                    minutes = 0
+
+                    if "minute" in time_part:
+                        try:
+                            minutes = int(
+                                time_part.split()[0]
+                            )
+                        except:
+                            minutes = 5
+
+                    speak(
+                        add_reminder(
+                            task,
+                            delay_minutes=minutes
+                        )
+                    )
+
+            continue
+
+        # ======================================
+        # PROCESS REQUEST
+        # ======================================
+
+        memory = process_command(
+            user_input,
+            memory
         )
 
-        print(f"\nJarvis: {result['response']}\n")
 
+# ==========================================
+# ENTRY POINT
+# ==========================================
 
 if __name__ == "__main__":
 
