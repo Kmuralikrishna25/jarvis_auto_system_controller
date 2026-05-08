@@ -33,16 +33,28 @@ def _speak(text):
 
     stop_event.clear()
 
-    try:
+    words = text.split()
 
-        speaker.Speak(
-            text
-            # No async flag - speak synchronously
-        )
+    chunk = ""
 
-    except Exception as e:
+    for word in words:
 
-        print(f"Speech error: {e}")
+        if stop_event.is_set():
+            break
+
+        chunk += word + " "
+
+        # Speak in small chunks (async)
+        if len(chunk.split()) >= 6:
+
+            speaker.Speak(chunk, 1)
+
+            chunk = ""
+
+    # Speak remaining text
+    if chunk and not stop_event.is_set():
+
+        speaker.Speak(chunk, 1)
 
 
 # ==========================================
@@ -76,13 +88,10 @@ def stop_speaking():
 
     try:
 
-        speaker.Speak(
-            "",
-            3  # Purge flag
-        )
+        # Purge current speech
+        speaker.Speak("", 3)
 
     except:
-
         pass
 
 
@@ -100,10 +109,9 @@ def listen():
         print("LISTENING - SPEAK NOW")
         print("="*40 + "\n")
 
-        # Beep to indicate ready to listen
+        # Beep to indicate ready
         winsound.Beep(1000, 200)
 
-        # Short delay for user to prepare
         time.sleep(0.5)
 
         recognizer.adjust_for_ambient_noise(
