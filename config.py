@@ -2,7 +2,7 @@
 # OLLAMA CONFIGURATION
 # ==============================
 
-OLLAMA_MODEL = "llama3.2"
+OLLAMA_MODEL = "llama2"
 
 TEMPERATURE = 0.7
 
