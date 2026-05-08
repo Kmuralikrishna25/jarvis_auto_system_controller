@@ -2,7 +2,9 @@ from graph.builder import jarvis_graph
 
 from agents.voice_agent import (
     listen,
+    listen_for_interrupt,
     speak,
+    speak_and_check_interrupt,
     stop_speaking
 )
 
@@ -62,7 +64,20 @@ def process_command(user_input: str, memory: list):
         memory
     )
 
-    speak(response)
+    # Speak and check for interruption
+    interrupt = speak_and_check_interrupt(
+        response
+    )
+
+    # If interrupted, process the new command (loop)
+    while interrupt:
+
+        print(f"\n[Processing interrupt: {interrupt}]\n")
+
+        interrupt = process_command(
+            interrupt,
+            memory
+        )
 
     return memory
 
@@ -136,7 +151,12 @@ def run_jarvis():
 
         if "list reminders" in user_input or "show reminders" in user_input:
 
-            speak(list_reminders())
+            interrupt = speak_and_check_interrupt(
+                list_reminders()
+            )
+
+            if interrupt:
+                process_command(interrupt, memory)
 
             continue
 
@@ -174,12 +194,15 @@ def run_jarvis():
                         except:
                             minutes = 5
 
-                    speak(
+                    interrupt = speak_and_check_interrupt(
                         add_reminder(
                             task,
                             delay_minutes=minutes
                         )
                     )
+
+                    if interrupt:
+                        process_command(interrupt, memory)
 
             continue
 

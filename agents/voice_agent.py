@@ -96,6 +96,60 @@ def stop_speaking():
 
 
 # ==========================================
+# SPEAK WITH INTERRUPTION CHECK
+# ==========================================
+
+def speak_and_check_interrupt(text, memory=None):
+
+    speak(text)
+
+    # While speaking, check for interruptions
+    while (
+        speech_thread and
+        speech_thread.is_alive()
+    ):
+
+        interrupt = listen_for_interrupt(timeout=1)
+
+        if interrupt:
+
+            print(f"\n[Interrupt detected: {interrupt}]\n")
+
+            stop_speaking()
+
+            return interrupt
+
+    return ""
+
+
+# ==========================================
+# LISTEN FOR INTERRUPT (SHORT TIMEOUT)
+# ==========================================
+
+def listen_for_interrupt(timeout=1):
+
+    recognizer = sr.Recognizer()
+
+    try:
+
+        with sr.Microphone() as source:
+
+            audio = recognizer.listen(
+                source,
+                timeout=timeout,
+                phrase_time_limit=3
+            )
+
+        command = recognizer.recognize_google(audio)
+
+        return command.lower()
+
+    except:
+
+        return None
+
+
+# ==========================================
 # LISTEN FUNCTION
 # ==========================================
 
