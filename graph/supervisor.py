@@ -21,49 +21,59 @@ def supervisor(state: AgentState):
         )
 
     prompt = f"""
-You are Jarvis's supervisor.
+You are Jarvis's router.
 
-Context:
-{context}
+User: {user_input}
 
-User request: {user_input}
-
-Available agents:
-- system_agent (open apps, screenshot, shutdown, restart)
-- browser_agent (search google, open youtube)
-- coding_agent (code, programming)
-- file_agent (read, write, list files)
-- memory_agent (chat, follow-up)
-
-If multiple tasks, return ALL agents needed in order, separated by commas.
-If single task, return ONLY one agent name.
+RULES:
+- "open youtube" or "play X" -> browser_agent
+- "search google" or "search for X" -> browser_agent
+- "open chrome/vscode" -> system_agent
+- Multiple tasks -> return all agents, comma separated
 
 EXAMPLES:
-"open chrome" -> system_agent
-"open chrome and search for X" -> system_agent,browser_agent
-"write code then save to file" -> coding_agent,file_agent
+Q: open youtube
+A: browser_agent
 
-OUTPUT ONLY AGENT NAMES, NO OTHER TEXT.
+Q: open chrome and search for X
+A: system_agent,browser_agent
+
+Q: play python tutorial on youtube
+A: browser_agent
+
+OUTPUT ONLY AGENT NAMES:
 """
 
     response = ask_llm(prompt).strip().lower()
 
-    # Parse agents from response
+    # Aggressive parsing - extract only valid agent names
     agents = []
 
-    for word in response.replace(",", " ").split():
+    valid = [
+        "system_agent",
+        "browser_agent",
+        "coding_agent",
+        "memory_agent",
+        "file_agent"
+    ]
 
-        word = word.strip()
+    # Check if response contains agent names
+    for agent in valid:
 
-        if word in [
-            "system_agent",
-            "browser_agent",
-            "coding_agent",
-            "memory_agent",
-            "file_agent"
-        ] and word not in agents:
+        if agent in response and agent not in agents:
 
-            agents.append(word)
+            agents.append(agent)
+
+    # If no agents found, use LLM response as-is if valid
+    if not agents:
+
+        for word in response.split():
+
+            word = word.strip(".,;:")
+
+            if word in valid and word not in agents:
+
+                agents.append(word)
 
     if agents:
 
@@ -71,6 +81,11 @@ OUTPUT ONLY AGENT NAMES, NO OTHER TEXT.
             "next_agent": agents[0],
             "pending_agents": agents[1:]
         }
+
+    return {
+        "next_agent": "memory_agent",
+        "pending_agents": []
+    }
 
     return {
         "next_agent": "memory_agent",

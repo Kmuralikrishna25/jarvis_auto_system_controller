@@ -65,3 +65,17 @@ def open_whatsapp() -> str:
     )
 
     return "Opening WhatsApp Web"
+
+
+def search_youtube(query: str) -> str:
+
+    import webbrowser
+
+    if not query:
+        query = "trending"
+
+    url = f"https://www.youtube.com/results?search_query={query}"
+
+    webbrowser.open(url)
+
+    return f"Searching YouTube for {query}"

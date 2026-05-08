@@ -2,7 +2,8 @@ from graph.state import AgentState
 
 from tools.system_tools import (
     search_google,
-    open_youtube
+    open_youtube,
+    search_youtube
 )
 
 
@@ -14,9 +15,35 @@ def browser_agent(state: AgentState):
 
         response = "Browser command not recognized"
 
+        # ==========================================
+        # YOUTUBE
+        # ==========================================
+
         if "youtube" in user_input:
 
-            response = open_youtube()
+            # Check if want to play/search something
+            if any(w in user_input for w in ["play", "search", "find"]):
+
+                # Extract query
+                query = user_input
+
+                for word in ["play", "search", "find"]:
+                    if word in query:
+                        query = query.split(word)[-1].strip()
+                        break
+
+                if "youtube" in query:
+                    query = query.replace("youtube", "").strip()
+
+                response = search_youtube(query)
+
+            else:
+
+                response = open_youtube()
+
+        # ==========================================
+        # SEARCH GOOGLE
+        # ==========================================
 
         elif "search" in user_input:
 
@@ -33,8 +60,11 @@ def browser_agent(state: AgentState):
                 ).strip()
 
             if query:
+
                 response = search_google(query)
+
             else:
+
                 response = "What should I search for?"
 
         return {
