@@ -45,6 +45,69 @@ def reminder_checker(memory: list, running: list):
 
 def process_command(user_input: str, memory: list):
 
+    user_lower = user_input.lower()
+
+    # ==========================================
+    # HANDLE COMPOUND COMMANDS
+    # Split by " and ", " then ", or comma
+    # ==========================================
+
+    import re
+
+    # Split by common conjunctions and punctuation
+    delimiters = r" and | then |, "
+    parts = [
+        p.strip()
+        for p in re.split(delimiters, user_lower)
+        if p.strip()
+    ]
+
+    if len(parts) > 1:
+
+        print(f"\n[Compound command detected: {parts}]\n")
+
+        all_responses = []
+
+        for part in parts:
+
+            print(f"\n[Processing: {part}]\n")
+
+            initial_state = {
+                "user_input": part,
+                "next_agent": "",
+                "response": "",
+                "conversation_history": memory,
+                "context": {}
+            }
+
+            result = jarvis_graph.invoke(initial_state)
+
+            response = result.get("response", "")
+
+            memory = result.get(
+                "conversation_history",
+                memory
+            )
+
+            all_responses.append(response)
+
+            # Speak this part and check for interruption
+            interrupt = speak_and_check_interrupt(response)
+
+            if interrupt:
+
+                # Process the interrupt instead
+                return process_command(
+                    interrupt,
+                    memory
+                )
+
+        return memory
+
+    # ==========================================
+    # SINGLE COMMAND PROCESSING
+    # ==========================================
+
     initial_state = {
         "user_input": user_input,
         "next_agent": "",
@@ -57,7 +120,7 @@ def process_command(user_input: str, memory: list):
         initial_state
     )
 
-    response = result["response"]
+    response = result.get("response", "")
 
     memory = result.get(
         "conversation_history",
