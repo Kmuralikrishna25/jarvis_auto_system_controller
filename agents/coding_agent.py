@@ -10,12 +10,9 @@ def coding_agent(state: AgentState):
         user_input = state["user_input"]
 
         prompt = f"""
-You are an expert AI coding assistant.
+User: {user_input}
 
-User Request:
-{user_input}
-
-Provide clean and professional code.
+Provide clean code only. No explanations unless asked.
 """
 
         response = ask_llm(prompt)
@@ -27,5 +24,5 @@ Provide clean and professional code.
     except Exception as e:
 
         return {
-            "response": f"Error in coding agent: {str(e)}"
+            "response": f"Error: {str(e)}"
         }

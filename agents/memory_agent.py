@@ -19,16 +19,11 @@ def memory_agent(state: AgentState):
         context = get_context(memory)
 
         prompt = f"""
-You are Jarvis's memory system.
-
-Context:
 {context}
 
 User: {user_input}
 
-Based on the conversation history, provide a contextual response.
-If this is a follow-up question, reference previous conversation.
-Keep response concise and helpful.
+Provide a brief, direct response in 1-2 sentences.
 """
 
         response = ask_llm(prompt)
@@ -53,6 +48,6 @@ Keep response concise and helpful.
     except Exception as e:
 
         return {
-            "response": f"Error in memory agent: {str(e)}",
+            "response": f"Error: {str(e)}",
             "conversation_history": state.get("conversation_history", [])
         }

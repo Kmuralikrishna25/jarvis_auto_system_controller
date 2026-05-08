@@ -3,39 +3,54 @@ from graph.state import AgentState
 from tools.ai_tools import ask_llm
 
 
+# Keywords for direct routing (bypass LLM)
+SYSTEM_KEYWORDS = [
+    "open chrome", "open vscode", "open youtube",
+    "open whatsapp", "shutdown", "restart",
+    "screenshot", "search google"
+]
+
+FILE_KEYWORDS = [
+    "list", "show files", "read file", "open file",
+    "create directory", "make folder", "search for", "find files"
+]
+
+
 def supervisor(state: AgentState):
 
-    user_input = state["user_input"]
+    user_input = state["user_input"].lower()
 
-    memory = state.get(
-        "conversation_history",
-        []
-    )
+    # ==========================================
+    # DIRECT KEYWORD MATCHING (BYPASS LLM)
+    # ==========================================
+
+    # System commands
+    if any(kw in user_input for kw in SYSTEM_KEYWORDS):
+        return {"next_agent": "system_agent"}
+
+    # File commands
+    if any(kw in user_input for kw in FILE_KEYWORDS):
+        return {"next_agent": "file_agent"}
+
+    # ==========================================
+    # LLM-BASED ROUTING FOR COMPLEX QUERIES
+    # ==========================================
+
+    memory = state.get("conversation_history", [])
 
     context = ""
-
     if memory:
-
         recent = memory[-5:]
-
         context = "Previous: " + " | ".join(
             [m["content"] for m in recent]
         )
 
     prompt = f"""
-You are Jarvis's supervisor.
-
 {context}
 
-User request: {user_input}
+User: {user_input}
 
-Decide which agent should handle this:
-- system_agent: OS commands, open apps, shutdown, restart, screenshot
-- browser_agent: web search, YouTube, browsing
-- coding_agent: code, programming, debugging
-- memory_agent: follow-up questions, context-aware requests
-- file_agent: file operations, read/write, list directories
-
+Route to: system_agent, browser_agent, coding_agent, file_agent, or memory_agent.
 Respond with ONLY the agent name.
 """
 

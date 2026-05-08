@@ -31,34 +31,16 @@ def _speak(text):
 
     stop_event.clear()
 
-    words = text.split()
-
-    chunk = ""
-
-    for word in words:
-
-        if stop_event.is_set():
-
-            break
-
-        chunk += word + " "
-
-        # Speak in small chunks
-        if len(chunk.split()) >= 8:
-
-            speaker.Speak(
-                chunk,
-                1
-            )
-
-            chunk = ""
-
-    if chunk and not stop_event.is_set():
+    try:
 
         speaker.Speak(
-            chunk,
-            1
+            text,
+            1  # Async flag
         )
+
+    except Exception as e:
+
+        print(f"Speech error: {e}")
 
 
 # ==========================================
@@ -94,7 +76,7 @@ def stop_speaking():
 
         speaker.Speak(
             "",
-            3
+            3  # Purge flag
         )
 
     except:
