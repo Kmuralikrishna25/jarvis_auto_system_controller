@@ -8,6 +8,12 @@ from agents.voice_agent import (
     stop_speaking
 )
 
+from agents.system_agent import system_agent
+from agents.browser_agent import browser_agent
+from agents.coding_agent import coding_agent
+from agents.memory_agent import memory_agent
+from agents.file_agent import file_agent
+
 from tools.memory_tools import (
     load_memory,
     save_memory
@@ -20,6 +26,19 @@ from tools.scheduler_tools import (
 
 import threading
 import time
+
+
+# ==========================================
+# AGENT MAP
+# ==========================================
+
+AGENTS = {
+    "system_agent": system_agent,
+    "browser_agent": browser_agent,
+    "coding_agent": coding_agent,
+    "memory_agent": memory_agent,
+    "file_agent": file_agent
+}
 
 
 # ==========================================
@@ -39,8 +58,6 @@ def reminder_checker(memory: list, running: list):
         time.sleep(30)
 
 
-# ==========================================
-# PROCESS USER REQUEST
 # ==========================================
 # PROCESS USER REQUEST
 # ==========================================
@@ -77,39 +94,48 @@ def process_command(user_input: str, memory: list):
             memory
         )
 
-    # Process pending agents from supervisor
+    # Process pending agents directly
     pending = result.get("pending_agents", [])
 
     for agent_name in pending:
 
         print(f"\n[Processing next agent: {agent_name}]\n")
 
-        state2 = {
-            "user_input": user_input,
-            "next_agent": agent_name,
-            "response": "",
-            "conversation_history": memory,
-            "context": {},
-            "pending_agents": []
-        }
+        agent_func = AGENTS.get(agent_name)
 
-        result2 = jarvis_graph.invoke(state2)
+        if agent_func:
 
-        response2 = result2.get("response", "")
+            state2 = {
+                "user_input": user_input,
+                "next_agent": agent_name,
+                "response": "",
+                "conversation_history": memory,
+                "context": {},
+                "pending_agents": []
+            }
 
-        memory = result2.get(
-            "conversation_history",
-            memory
-        )
+            result2 = agent_func(state2)
 
-        interrupt = speak_and_check_interrupt(response2)
+            response2 = result2.get(
+                "response",
+                ""
+            )
 
-        if interrupt:
-
-            return process_command(
-                interrupt,
+            memory = result2.get(
+                "conversation_history",
                 memory
             )
+
+            interrupt = speak_and_check_interrupt(
+                response2
+            )
+
+            if interrupt:
+
+                return process_command(
+                    interrupt,
+                    memory
+                )
 
     return memory
 
