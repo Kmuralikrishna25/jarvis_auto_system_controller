@@ -94,16 +94,19 @@ def listen():
 
     with sr.Microphone() as source:
 
-        print("\nListening...\n")
+        print("\n" + "="*40)
+        print("LISTENING - SPEAK NOW")
+        print("="*40 + "\n")
 
         recognizer.adjust_for_ambient_noise(
             source,
-            duration=0.5
+            duration=1
         )
 
         audio = recognizer.listen(
             source,
-            phrase_time_limit=5
+            phrase_time_limit=15,
+            timeout=10
         )
 
     try:
@@ -115,6 +118,12 @@ def listen():
         print(f"\nYou: {command}\n")
 
         return command.lower()
+
+    except sr.WaitTimeoutError:
+
+        print("\nTimeout - no speech detected\n")
+
+        return ""
 
     except:
 
