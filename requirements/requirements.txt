@@ -1,6 +1,6 @@
 langgraph
 langchain
-langchain-google-genai
+langchain-google-genai  
 google-generativeai
 python-dotenv
 pyautogui
