@@ -8,12 +8,6 @@ from agents.voice_agent import (
     stop_speaking
 )
 
-from agents.system_agent import system_agent
-from agents.browser_agent import browser_agent
-from agents.coding_agent import coding_agent
-from agents.memory_agent import memory_agent
-from agents.file_agent import file_agent
-
 from tools.memory_tools import (
     load_memory,
     save_memory
@@ -26,19 +20,6 @@ from tools.scheduler_tools import (
 
 import threading
 import time
-
-
-# ==========================================
-# AGENT MAP
-# ==========================================
-
-AGENTS = {
-    "system_agent": system_agent,
-    "browser_agent": browser_agent,
-    "coding_agent": coding_agent,
-    "memory_agent": memory_agent,
-    "file_agent": file_agent
-}
 
 
 # ==========================================
@@ -77,7 +58,7 @@ def process_command(user_input: str, memory: list):
         initial_state
     )
 
-    response = result.get("response", "")
+    response = str(result.get("response", ""))
 
     memory = result.get(
         "conversation_history",
@@ -87,92 +68,12 @@ def process_command(user_input: str, memory: list):
     # Speak and check for interruption
     interrupt = speak_and_check_interrupt(response)
 
+    # If interrupted, process the new command
     if interrupt:
 
-        return process_command(
-            interrupt,
-            memory
-        )
+        print(f"\n[Interrupt: {interrupt}]\n")
 
-    # Process pending agents directly
-    pending = result.get("pending_agents", [])
-
-    for agent_name in pending:
-
-        print(f"\n[Processing next agent: {agent_name}]\n")
-
-        agent_func = AGENTS.get(agent_name)
-
-        if agent_func:
-
-            state2 = {
-                "user_input": user_input,
-                "next_agent": agent_name,
-                "response": "",
-                "conversation_history": memory,
-                "context": {},
-                "pending_agents": []
-            }
-
-            result2 = agent_func(state2)
-
-            response2 = result2.get(
-                "response",
-                ""
-            )
-
-            memory = result2.get(
-                "conversation_history",
-                memory
-            )
-
-            interrupt = speak_and_check_interrupt(
-                response2
-            )
-
-            if interrupt:
-
-                return process_command(
-                    interrupt,
-                    memory
-                )
-
-    return memory
-
-    # ==========================================
-    # SINGLE COMMAND PROCESSING
-    # ==========================================
-
-    initial_state = {
-        "user_input": user_input,
-        "next_agent": "",
-        "response": "",
-        "conversation_history": memory,
-        "context": {}
-    }
-
-    result = jarvis_graph.invoke(
-        initial_state
-    )
-
-    response = result.get("response", "")
-
-    memory = result.get(
-        "conversation_history",
-        memory
-    )
-
-    # Speak and check for interruption
-    interrupt = speak_and_check_interrupt(
-        response
-    )
-
-    # If interrupted, process the new command (loop)
-    while interrupt:
-
-        print(f"\n[Processing interrupt: {interrupt}]\n")
-
-        interrupt = process_command(
+        process_command(
             interrupt,
             memory
         )
