@@ -7,12 +7,17 @@ from tools.ai_tools import ask_llm
 SYSTEM_KEYWORDS = [
     "open chrome", "open vscode", "open youtube",
     "open whatsapp", "shutdown", "restart",
-    "screenshot", "search google"
+    "screenshot"
+]
+
+BROWSER_KEYWORDS = [
+    "youtube", "search", "search for",
+    "search google"
 ]
 
 FILE_KEYWORDS = [
     "list", "show files", "read file", "open file",
-    "create directory", "make folder", "search for", "find files"
+    "create directory", "make folder", "find files"
 ]
 
 
@@ -27,6 +32,10 @@ def supervisor(state: AgentState):
     # System commands
     if any(kw in user_input for kw in SYSTEM_KEYWORDS):
         return {"next_agent": "system_agent"}
+
+    # Browser commands
+    if any(kw in user_input for kw in BROWSER_KEYWORDS):
+        return {"next_agent": "browser_agent"}
 
     # File commands
     if any(kw in user_input for kw in FILE_KEYWORDS):
