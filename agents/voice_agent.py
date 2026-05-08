@@ -34,8 +34,8 @@ def _speak(text):
     try:
 
         speaker.Speak(
-            text,
-            1  # Async flag
+            text
+            # No async flag - speak synchronously
         )
 
     except Exception as e:
