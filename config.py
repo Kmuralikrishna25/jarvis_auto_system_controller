@@ -1,8 +1,16 @@
-import os
-from dotenv import load_dotenv
+# ==============================
+# OLLAMA CONFIGURATION
+# ==============================
 
-load_dotenv()
+OLLAMA_MODEL = "llama3.2"
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME", "gemini-1.5-flash")
-TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+TEMPERATURE = 0.7
+
+
+# ==============================
+# SYSTEM CONFIGURATION
+# ==============================
+
+SCREENSHOT_DIR = "screenshots"
+
+MEMORY_PATH = "memory/chat_history.json"

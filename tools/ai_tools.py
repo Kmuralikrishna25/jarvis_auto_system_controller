@@ -1,22 +1,20 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 
 from config import (
-    GEMINI_API_KEY,
-    MODEL_NAME,
+    OLLAMA_MODEL,
     TEMPERATURE
 )
 
-llm = ChatGoogleGenerativeAI(
-    model=MODEL_NAME,
-    google_api_key=GEMINI_API_KEY,
+llm = ChatOllama(
+    model=OLLAMA_MODEL,
     temperature=TEMPERATURE
 )
 
 
 def ask_llm(prompt: str) -> str:
     """
-    Send prompt to Gemini model
-    and return response text.
+    Send prompt to Ollama model
+    and return response.
     """
 
     response = llm.invoke(prompt)

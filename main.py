@@ -11,7 +11,9 @@ def run_jarvis():
         user_input = input("You: ")
 
         if user_input.lower() == "exit":
-            print("Jarvis: Goodbye")
+
+            print("\nJarvis: Goodbye\n")
+
             break
 
         initial_state = {
