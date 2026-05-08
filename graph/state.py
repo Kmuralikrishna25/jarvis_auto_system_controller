@@ -12,3 +12,5 @@ class AgentState(TypedDict):
     conversation_history: List[Dict[str, str]]
 
     context: Dict[str, Any]
+
+    pending_agents: List[str]

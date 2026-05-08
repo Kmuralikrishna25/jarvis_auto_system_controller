@@ -3,77 +3,76 @@ from graph.state import AgentState
 from tools.ai_tools import ask_llm
 
 
-# Keywords for direct routing (bypass LLM)
-SYSTEM_KEYWORDS = [
-    "open chrome", "open vscode", "open youtube",
-    "open whatsapp", "shutdown", "restart",
-    "screenshot"
-]
-
-BROWSER_KEYWORDS = [
-    "youtube", "search", "search for",
-    "search google"
-]
-
-FILE_KEYWORDS = [
-    "list", "show files", "read file", "open file",
-    "create directory", "make folder", "find files"
-]
-
-
 def supervisor(state: AgentState):
 
-    user_input = state["user_input"].lower()
-
-    # ==========================================
-    # DIRECT KEYWORD MATCHING (BYPASS LLM)
-    # ==========================================
-
-    # System commands
-    if any(kw in user_input for kw in SYSTEM_KEYWORDS):
-        return {"next_agent": "system_agent"}
-
-    # Browser commands
-    if any(kw in user_input for kw in BROWSER_KEYWORDS):
-        return {"next_agent": "browser_agent"}
-
-    # File commands
-    if any(kw in user_input for kw in FILE_KEYWORDS):
-        return {"next_agent": "file_agent"}
-
-    # ==========================================
-    # LLM-BASED ROUTING FOR COMPLEX QUERIES
-    # ==========================================
+    user_input = state["user_input"]
 
     memory = state.get("conversation_history", [])
 
     context = ""
+
     if memory:
+
         recent = memory[-5:]
-        context = "Previous: " + " | ".join(
-            [m["content"] for m in recent]
+
+        context = "\n".join(
+            [f"{m['role']}: {m['content']}"
+             for m in recent]
         )
 
     prompt = f"""
+You are Jarvis's supervisor.
+
+Context:
 {context}
 
-User: {user_input}
+User request: {user_input}
 
-Route to: system_agent, browser_agent, coding_agent, file_agent, or memory_agent.
-Respond with ONLY the agent name.
+Available agents:
+- system_agent (open apps, screenshot, shutdown, restart)
+- browser_agent (search google, open youtube)
+- coding_agent (code, programming)
+- file_agent (read, write, list files)
+- memory_agent (chat, follow-up)
+
+If multiple tasks, return ALL agents needed in order, separated by commas.
+If single task, return ONLY one agent name.
+
+EXAMPLES:
+"open chrome" -> system_agent
+"open chrome and search for X" -> system_agent,browser_agent
+"write code then save to file" -> coding_agent,file_agent
+
+OUTPUT ONLY AGENT NAMES, NO OTHER TEXT.
 """
 
     response = ask_llm(prompt).strip().lower()
 
-    valid_agents = [
-        "system_agent",
-        "browser_agent",
-        "coding_agent",
-        "memory_agent",
-        "file_agent"
-    ]
+    # Parse agents from response
+    agents = []
 
-    if response in valid_agents:
-        return {"next_agent": response}
+    for word in response.replace(",", " ").split():
 
-    return {"next_agent": "memory_agent"}
+        word = word.strip()
+
+        if word in [
+            "system_agent",
+            "browser_agent",
+            "coding_agent",
+            "memory_agent",
+            "file_agent"
+        ] and word not in agents:
+
+            agents.append(word)
+
+    if agents:
+
+        return {
+            "next_agent": agents[0],
+            "pending_agents": agents[1:]
+        }
+
+    return {
+        "next_agent": "memory_agent",
+        "pending_agents": []
+    }

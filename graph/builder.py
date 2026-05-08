@@ -63,9 +63,14 @@ workflow.set_entry_point(
 # CONDITIONAL ROUTING
 # ====================================
 
+def route_from_supervisor(state: AgentState):
+
+    return state["next_agent"]
+
+
 workflow.add_conditional_edges(
     "supervisor",
-    lambda state: state["next_agent"],
+    route_from_supervisor,
     {
         "system_agent": "system_agent",
         "browser_agent": "browser_agent",

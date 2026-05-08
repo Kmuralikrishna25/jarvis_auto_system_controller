@@ -42,67 +42,76 @@ def reminder_checker(memory: list, running: list):
 # ==========================================
 # PROCESS USER REQUEST
 # ==========================================
+# PROCESS USER REQUEST
+# ==========================================
 
 def process_command(user_input: str, memory: list):
 
-    user_lower = user_input.lower()
+    initial_state = {
+        "user_input": user_input,
+        "next_agent": "",
+        "response": "",
+        "conversation_history": memory,
+        "context": {},
+        "pending_agents": []
+    }
 
-    # ==========================================
-    # HANDLE COMPOUND COMMANDS
-    # Split by " and ", " then ", or comma
-    # ==========================================
+    result = jarvis_graph.invoke(
+        initial_state
+    )
 
-    import re
+    response = result.get("response", "")
 
-    # Split by common conjunctions and punctuation
-    delimiters = r" and | then |, "
-    parts = [
-        p.strip()
-        for p in re.split(delimiters, user_lower)
-        if p.strip()
-    ]
+    memory = result.get(
+        "conversation_history",
+        memory
+    )
 
-    if len(parts) > 1:
+    # Speak and check for interruption
+    interrupt = speak_and_check_interrupt(response)
 
-        print(f"\n[Compound command detected: {parts}]\n")
+    if interrupt:
 
-        all_responses = []
+        return process_command(
+            interrupt,
+            memory
+        )
 
-        for part in parts:
+    # Process pending agents from supervisor
+    pending = result.get("pending_agents", [])
 
-            print(f"\n[Processing: {part}]\n")
+    for agent_name in pending:
 
-            initial_state = {
-                "user_input": part,
-                "next_agent": "",
-                "response": "",
-                "conversation_history": memory,
-                "context": {}
-            }
+        print(f"\n[Processing next agent: {agent_name}]\n")
 
-            result = jarvis_graph.invoke(initial_state)
+        state2 = {
+            "user_input": user_input,
+            "next_agent": agent_name,
+            "response": "",
+            "conversation_history": memory,
+            "context": {},
+            "pending_agents": []
+        }
 
-            response = result.get("response", "")
+        result2 = jarvis_graph.invoke(state2)
 
-            memory = result.get(
-                "conversation_history",
+        response2 = result2.get("response", "")
+
+        memory = result2.get(
+            "conversation_history",
+            memory
+        )
+
+        interrupt = speak_and_check_interrupt(response2)
+
+        if interrupt:
+
+            return process_command(
+                interrupt,
                 memory
             )
 
-            all_responses.append(response)
-
-            # Speak this part and check for interruption
-            interrupt = speak_and_check_interrupt(response)
-
-            if interrupt:
-
-                # Process the interrupt instead
-                return process_command(
-                    interrupt,
-                    memory
-                )
-
-        return memory
+    return memory
 
     # ==========================================
     # SINGLE COMMAND PROCESSING
