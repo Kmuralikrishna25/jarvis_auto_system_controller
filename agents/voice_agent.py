@@ -1,6 +1,8 @@
 import threading
 import speech_recognition as sr
 import win32com.client
+import winsound
+import time
 
 
 # ==========================================
@@ -97,6 +99,12 @@ def listen():
         print("\n" + "="*40)
         print("LISTENING - SPEAK NOW")
         print("="*40 + "\n")
+
+        # Beep to indicate ready to listen
+        winsound.Beep(1000, 200)
+
+        # Short delay for user to prepare
+        time.sleep(0.5)
 
         recognizer.adjust_for_ambient_noise(
             source,
