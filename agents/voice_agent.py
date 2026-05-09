@@ -163,8 +163,7 @@ def listen():
         print("LISTENING - SPEAK NOW")
         print("="*40 + "\n")
 
-        # Beep to indicate ready
-        winsound.Beep(1000, 200)
+        # Ready to listen
 
         time.sleep(0.5)
 

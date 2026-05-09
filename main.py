@@ -87,7 +87,7 @@ def process_command(user_input: str, memory: list):
 
 def run_jarvis():
 
-    speak("Jarvis activated.")
+    speak("Welcome boss")
 
     memory = load_memory()
 
@@ -140,7 +140,7 @@ def run_jarvis():
 
             running[0] = False
 
-            speak("Goodbye.")
+            speak("Ok boss, have a nice day")
 
             break
 
