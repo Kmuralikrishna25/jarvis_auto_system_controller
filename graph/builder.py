@@ -42,7 +42,6 @@ TOOLS = {
     "open_vscode": open_vscode,
     "open_youtube": open_youtube,
     "open_whatsapp": open_whatsapp,
-    "search_google": search_google,
     "search_youtube": search_youtube,
     "shutdown_pc": shutdown_pc,
     "restart_pc": restart_pc,
