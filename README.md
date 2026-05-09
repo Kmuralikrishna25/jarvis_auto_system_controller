@@ -4,30 +4,44 @@ A voice-controlled AI assistant for Windows PC automation powered by Google Gemi
 
 ## Features
 
-- 🎤 Voice command recognition (say "Jarvis" wake word)
-- 🗣️ Text-to-speech responses
+- 🎤 Voice command recognition
+- 🗣️ Text-to-speech responses (Windows SAPI)
 - 🤖 Google Gemini integration for smart command processing
-- 📱 Control applications (WhatsApp, Chrome, Spotify, etc.)
-- 🔊 System controls (volume, brightness)
+- 📱 Control applications (Chrome, VS Code, WhatsApp, YouTube)
+- 🔊 System controls (brightness, shutdown, restart)
 - 📸 Screenshot capture
-- 🤖 Automation tasks
+- 📁 File operations (read, write, list, search)
+- 🔔 Reminders and scheduling
+- 🧠 Persistent conversation memory
+- ⏹️ ESC key to stop speech anytime
 
 ## Project Structure
 
 ```
-jarvis/
-├── main.py           # Entry point
-├── config.py         # Configuration settings
-├── requirements.txt   # Dependencies
-├── modules/          # Core modules
-│   ├── voice.py      # Speech recognition & TTS
-│   ├── ai_brain.py   # Google Gemini integration
-│   ├── commands.py   # Command execution
-│   ├── automation.py # Automation tasks
-│   └── utils.py      # Utility functions
-├── memory/           # Memory storage
-├── sounds/           # Sound files
-└── screenshots/      # Screenshot storage
+jarvis_auto_system_controller/
+├── main.py               # Entry point
+├── config.py             # Configuration (Gemini model, API key)
+├── requirements.txt      # Dependencies
+├── .env                  # Environment variables (API keys)
+├── agents/               # Agent modules
+│   ├── voice_agent.py    # Speech recognition & TTS
+│   ├── browser_agent.py  # Web search & YouTube
+│   ├── coding_agent.py   # Programming assistance
+│   ├── system_agent.py   # System commands
+│   ├── memory_agent.py   # Conversation memory
+│   └── file_agent.py     # File operations
+├── graph/                # LangGraph workflow
+│   ├── builder.py        # Graph compilation
+│   ├── state.py          # Agent state types
+│   └── supervisor.py     # Task routing
+├── tools/                # Tool functions
+│   ├── ai_tools.py       # Gemini LLM interface
+│   ├── system_tools.py   # System control (apps, brightness, etc.)
+│   ├── file_tools.py     # File operations
+│   ├── memory_tools.py   # Memory storage
+│   └── scheduler_tools.py# Reminders & scheduling
+├── memory/               # Conversation history storage
+└── screenshots/          # Screenshot storage
 ```
 
 ## Setup
@@ -44,33 +58,46 @@ jarvis/
 
 3. Install dependencies:
    ```bash
-   pip install -r jarvis/requirements.txt
+   pip install -r requirements.txt
    ```
 
-4. Configure environment variables in `.env`:
+4. Configure `.env` file:
    ```
-   GEMINI_API_KEY=your_gemini_api_key_here
-   WAKE_WORD=jarvis
-   MICROPHONE_INDEX=5
+   GOOGLE_API_KEY=your_gemini_api_key_here
+   MODEL_NAME=gemini-2.0-flash
+   MICROPHONE_INDEX=0
    ```
+
+   Get a free Gemini API key: https://makersuite.google.com/app/apikey
 
 ## Usage
 
 Run Jarvis:
 ```bash
-python -m jarvis.main
+python main.py
 ```
 
-Choose mode:
-- **voice** - Say "Jarvis" followed by your command
-- **text** - Type commands directly
+Jarvis will say "Welcome boss" and start listening.
 
 ## Example Commands
 
-- "Jarvis, open WhatsApp"
-- "Jarvis, volume up"
-- "Jarvis, take screenshot"
-- "Jarvis, brightness down"
+- "Open Chrome"
+- "Open YouTube and play python tutorial"
+- "Search Google for weather"
+- "Open WhatsApp"
+- "Take screenshot"
+- "Decrease brightness"
+- "Shutdown" or "Restart"
+- "Remind me in 5 minutes to check email"
+- "List files"
+- "Read myfile.txt"
+- "Exit" - says "Ok boss, have a nice day"
+
+## Controls
+
+- **Say "stop"** while Jarvis is speaking to stop mid-sentence
+- **Press ESC** to stop speech immediately
+- Ask a new question while Jarvis answers to switch topics
 
 ## License
 
