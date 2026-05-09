@@ -3,6 +3,7 @@ import speech_recognition as sr
 import win32com.client
 import winsound
 import time
+import keyboard
 
 
 # ==========================================
@@ -23,6 +24,28 @@ speaker.Rate = 1
 speech_thread = None
 
 stop_event = threading.Event()
+
+
+# ==========================================
+# ESC KEY LISTENER
+# ==========================================
+
+def start_esc_listener():
+
+    def listen_esc():
+
+        keyboard.wait("esc")
+
+        stop_speaking()
+
+        print("\n[ESC pressed - stopped speaking]\n")
+
+    thread = threading.Thread(
+        target=listen_esc,
+        daemon=True
+    )
+
+    thread.start()
 
 
 # ==========================================
@@ -130,6 +153,9 @@ def listen_for_interrupt(timeout=1):
 
     recognizer = sr.Recognizer()
 
+    recognizer.energy_threshold = 3000
+    recognizer.dynamic_energy_threshold = False
+
     try:
 
         with sr.Microphone() as source:
@@ -157,13 +183,15 @@ def listen():
 
     recognizer = sr.Recognizer()
 
+    # Higher threshold = less sensitive to noise
+    recognizer.energy_threshold = 3000
+    recognizer.dynamic_energy_threshold = True
+
     with sr.Microphone() as source:
 
         print("\n" + "="*40)
         print("LISTENING - SPEAK NOW")
         print("="*40 + "\n")
-
-        # Ready to listen
 
         time.sleep(0.5)
 
@@ -197,3 +225,7 @@ def listen():
     except:
 
         return ""
+
+
+# Start ESC key listener
+start_esc_listener()
