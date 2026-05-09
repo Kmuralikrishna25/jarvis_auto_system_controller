@@ -30,6 +30,13 @@ from tools.file_tools import (
     search_files
 )
 
+from tools.web_tools import (
+    search_wikipedia,
+    search_serpapi,
+    get_weather,
+    get_news
+)
+
 
 TOOLS = {
     "open_chrome": open_chrome,
@@ -96,10 +103,26 @@ def jarvis_agent(state: AgentState):
             responses.append(open_youtube())
 
     # ==========================================
+    # WIKIPEDIA (BEFORE SEARCH)
+    # ==========================================
+
+    if "wikipedia" in user_input or "wiki" in user_input:
+
+        query = user_input
+
+        for word in ["search", "wikipedia", "wiki", "for", "about"]:
+            query = query.replace(word, "")
+
+        query = query.strip()
+
+        if query:
+            responses.append(search_wikipedia(query))
+
+    # ==========================================
     # GOOGLE SEARCH
     # ==========================================
 
-    if "search" in user_input:
+    if "search" in user_input and "wiki" not in user_input:
 
         query = user_input.replace("search", "").replace("for", "").strip()
 
@@ -163,6 +186,39 @@ def jarvis_agent(state: AgentState):
             if w in ["read", "file", "open"] and i + 1 < len(words):
                 responses.append(read_file(words[i + 1]))
                 break
+
+    # ==========================================
+    # WEATHER
+    # ==========================================
+
+    if "weather" in user_input:
+
+        words = user_input.split()
+
+        city = None
+
+        for i, w in enumerate(words):
+            if w in ["in", "at", "for", "weather"] and i + 1 < len(words):
+                city = words[i + 1]
+                break
+
+        if city:
+            responses.append(get_weather(city))
+        else:
+            responses.append("Which city?")
+
+    # ==========================================
+    # NEWS
+    # ==========================================
+
+    if "news" in user_input:
+
+        topic = user_input.replace("news", "").replace("about", "").strip()
+
+        if topic:
+            responses.append(get_news(topic))
+        else:
+            responses.append(get_news())
 
     # ==========================================
     # IF NO COMMAND MATCHED, USE LLM
