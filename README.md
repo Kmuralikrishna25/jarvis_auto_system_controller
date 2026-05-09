@@ -1,6 +1,6 @@
 # Jarvis AI Assistant
 
-A voice-controlled AI assistant for Windows PC automation powered by Google Gemini LLM.
+A voice-controlled AI assistant for Windows PC automation powered by Google Gemini LLM with real-time web data.
 
 ## Features
 
@@ -14,6 +14,10 @@ A voice-controlled AI assistant for Windows PC automation powered by Google Gemi
 - 🔔 Reminders and scheduling
 - 🧠 Persistent conversation memory
 - ⏹️ ESC key to stop speech anytime
+- 🌐 Wikipedia search (free, no key)
+- 🔍 Google Search via SerpAPI
+- 🌡️ Weather reports via OpenWeatherMap
+- 📰 Latest news via NewsAPI
 
 ## Project Structure
 
@@ -39,7 +43,8 @@ jarvis_auto_system_controller/
 │   ├── system_tools.py   # System control (apps, brightness, etc.)
 │   ├── file_tools.py     # File operations
 │   ├── memory_tools.py   # Memory storage
-│   └── scheduler_tools.py# Reminders & scheduling
+│   ├── scheduler_tools.py# Reminders & scheduling
+│   └── web_tools.py      # Wikipedia, SerpAPI, Weather, News
 ├── memory/               # Conversation history storage
 └── screenshots/          # Screenshot storage
 ```
@@ -66,6 +71,11 @@ jarvis_auto_system_controller/
    GOOGLE_API_KEY=your_gemini_api_key_here
    MODEL_NAME=gemini-2.0-flash
    MICROPHONE_INDEX=0
+   
+   # Optional: Get free keys from respective websites
+   SERPAPI_KEY=your_key      # https://serpapi.com (100 free/month)
+   WEATHER_API_KEY=your_key  # https://openweathermap.org
+   NEWSAPI_KEY=your_key      # https://newsapi.org (100 reqs/day)
    ```
 
    Get a free Gemini API key: https://makersuite.google.com/app/apikey

@@ -10,7 +10,6 @@ from tools.system_tools import (
     open_vscode,
     open_youtube,
     open_whatsapp,
-    search_google,
     search_youtube,
     extract_youtube_query,
     shutdown_pc,
@@ -130,7 +129,7 @@ def jarvis_agent(state: AgentState):
             query = query.replace("google", "").strip()
 
         if query:
-            responses.append(search_google(query))
+            responses.append(search_serpapi(query))
         else:
             responses.append("What should I search for?")
 
