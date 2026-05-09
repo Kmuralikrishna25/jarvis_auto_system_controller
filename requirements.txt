@@ -1,6 +1,8 @@
 langgraph
 langchain
-langchain-ollama
+langchain-google-genai
+google-generativeai
+python-dotenv
 pyautogui
 psutil
 speechrecognition

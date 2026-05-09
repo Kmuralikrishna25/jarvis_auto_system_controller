@@ -1,13 +1,15 @@
-from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from config import (
-    OLLAMA_MODEL,
+    GEMINI_API_KEY,
+    MODEL_NAME,
     TEMPERATURE
 )
 
 
-llm = ChatOllama(
-    model=OLLAMA_MODEL,
+llm = ChatGoogleGenerativeAI(
+    model=MODEL_NAME,
+    google_api_key=GEMINI_API_KEY,
     temperature=TEMPERATURE
 )
 

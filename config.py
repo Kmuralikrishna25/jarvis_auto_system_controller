@@ -1,10 +1,17 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # ==============================
-# OLLAMA CONFIGURATION
+# GEMINI CONFIGURATION
 # ==============================
 
-OLLAMA_MODEL = "llama2"
+GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 
-TEMPERATURE = 0.7
+MODEL_NAME = os.getenv("MODEL_NAME", "gemini-1.5-flash")
+
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 
 
 # ==============================
